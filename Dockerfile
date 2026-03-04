@@ -9,7 +9,7 @@ COPY .streamlit /app/.streamlit
 COPY src /app/src
 COPY streamlit_app.py /app/
 
-RUN uv sync --frozen && uv pip install --python /app/.venv/bin/python scipy
+RUN uv sync --frozen
 
 EXPOSE 8501
 

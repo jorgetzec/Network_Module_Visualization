@@ -330,7 +330,7 @@ def draw_interactive_network_plotly(
 
     normal_edge_trace = go.Scatter(
         x=normal_edge_x, y=normal_edge_y,
-        line=dict(width=0.5, color='rgba(200,200,200,0.5)'),
+        line=dict(width=0.5, color='#D3D3D3'),
         hoverinfo='none',
         mode='lines',
         name='Normal'
@@ -446,7 +446,7 @@ def draw_interactive_network_plotly_3d(
     # Normal edges: light gray for background
     normal_edge_trace = go.Scatter3d(
         x=normal_edge_x, y=normal_edge_y, z=normal_edge_z,
-        line=dict(width=2, color='rgba(200,200,200,0.5)'),
+        line=dict(width=2, color='#D3D3D3'),
         hoverinfo='none',
         mode='lines',
         name='Other Connections'
