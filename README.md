@@ -1,118 +1,105 @@
 # Network Module Visualization
 
-Network Module Visualization is a dual-interface tool for gene co-expression networks (WGCNA/Cytoscape/VisANT-like exports).
+[![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://www.docker.com/)
+[![Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://networkmodule-visualization.streamlit.app/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-- Python CLI for reproducible batch analysis
-- Streamlit web app for interactive exploration
-- Full-network and target-centered zoom visualizers
+**Network Module Visualization** is a dual-interface tool designed for analyzing and visualizing gene co-expression networks (WGCNA, Cytoscape, or VisANT-like exports). It features a robust 3D interactive engine and automated reporting.
+
+- **Python CLI** for reproducible batch analysis.
+* **Streamlit Web App** for interactive 2D and 3D exploration.
+- **Targeted Analysis**: Highlight specific genes and their neighborhoods.
+- **Docker Ready**: One-command deployment.
+
+---
 
 ## Features
 
-- Load `nodes` and `edges` tab-separated files
-- Filter by edge weight and minimum node degree
-- Highlight target genes and their direct neighbors
-- Inspect two views:
-  - Full filtered network
-  - Zoomed 1-hop target subnetwork
-- Export analysis outputs (`CSV`, `PDF`)
+- **Multi-dimensional Visualization**: Toggle between **2D Maps** and **3D Spherical** interactive views.
+- **Robust Filtering**: Filter by edge weight and minimum node degree iteratively.
+- **High-Quality Exports**: Generate publication-ready PDFs and detailed CSV reports.
+- **Smart Color Detection**: Automatic suggestion of module colors based on node attributes.
+- **Deep Zoom**: Focus on the 1-hop neighborhood of your target genes.
 
-## Expected Input Format
+## CLI Usage
 
-### `edges` file (TSV)
+The project includes a powerful command-line interface for batch processing.
 
-Required columns:
+### Command Reference
 
-- `fromNode`
-- `toNode`
-- `weight`
+| Argument | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `--nodes` | string | **Required** | Path to the nodes tab-separated file. |
+| `--edges` | string | **Required** | Path to the edges tab-separated file. |
+| `--weight` | float | **Required** | Weight threshold for filtering edges (0.0 to 1.0). |
+| `--genes` | string | None | Comma-separated list of gene IDs to highlight. |
+| `--genes-file` | string | None | Path to a file containing gene IDs (one per line). |
+| `--module` | string | `red` | Color name or hex code for highlighting. |
+| `--min-degree` | int | `1` | Minimum degree required for a node to be kept. |
+| `--output-prefix` | string | `network_analysis` | Prefix for generated reports and plots. |
+| `--show-only-target-labels` | flag | `False` | If set, skip labels for non-related genes. |
 
-Optional columns:
-
-- `direction`
-- `fromAltName`
-- `toAltName`
-
-### `nodes` file (TSV)
-
-Required columns:
-
-- `nodeName`
-- `altName`
-
-Optional column:
-
-- `nodeAttr[nodesPresent, ]`
-
-## Quick Start (Docker-first)
-
-This is the recommended way if you want to avoid creating a local `.venv`.
-
-1. Generate or refresh lockfile (when dependencies change):
-
+### Example
 ```bash
-uv lock
+uv run network-viz --nodes data/nodes.txt --edges data/edges.txt --weight 0.2 --genes HLM1,THO2 --module salmon
 ```
 
-2. Build image:
+---
+
+## Quick Start (Docker)
+
+Recommended for a clean environment without local dependencies.
+
+1. **Build the image**:
+   ```bash
+   docker build -t network-viz .
+   ```
+
+2. **Run the Streamlit app**:
+   ```bash
+   docker run --rm -p 8501:8501 network-viz
+   ```
+   *Access it at: [http://localhost:8501](http://localhost:8501)*
+
+3. **Run the CLI**:
+   ```bash
+   docker run --rm -v "${PWD}/data:/data" --entrypoint uv network-viz run network-viz --nodes /data/nodes.txt --edges /data/edges.txt --weight 0.15
+   ```
+
+---
+
+## Local Development
+
+Requires [uv](https://github.com/astral-sh/uv).
 
 ```bash
-docker build -t network-viz .
-```
-
-3. Run Streamlit app:
-
-```bash
-docker run --rm -p 8501:8501 network-viz
-```
-
-4. Open:
-
-```text
-http://localhost:8501
-```
-
-## Run CLI in Docker
-
-Example using local `data/` mounted as `/data`:
-
-```bash
-docker run --rm -v "${PWD}/data:/data" --entrypoint uv network-viz run network-viz --nodes /data/nodes-MODULE_salmon.txt --edges /data/edges-MODULE_salmon.txt --weight 0.2 --genes HLM1,THO2 --module salmon
-```
-
-## Local Development with `uv`
-
-```bash
+# Install dependencies
 uv sync
-uv run network-viz --help
+
+# Run the app
 uv run streamlit run streamlit_app.py
+
+# Run tests
+uv run pytest
 ```
 
-By default, `uv sync` creates `.venv` in the project folder.
+---
 
-To place the environment outside the repository (PowerShell):
+## Data Formats
 
-```powershell
-$env:UV_PROJECT_ENVIRONMENT="$env:USERPROFILE\.virtualenvs\network-viz"
-uv sync
-```
+### Edges File (TSV)
+Required columns: `fromNode`, `toNode`, `weight`.
+Optional: `direction`, `fromAltName`, `toAltName`.
 
-## Streamlit Upload Limit
+### Nodes File (TSV)
+Required columns: `nodeName`, `altName`.
+Supports custom attributes for automatic color detection (e.g., `nodeAttr[nodesPresent, ]`).
 
-Configured in `.streamlit/config.toml`:
+---
 
-- `server.maxUploadSize = 1024` (MB)
+## License
 
-## Project Structure
+This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details (or assume MIT for open-source use).
 
-```text
-.
-├── Dockerfile
-├── pyproject.toml
-├── streamlit_app.py
-└── src/network_viz/
-    ├── app.py
-    ├── cli.py
-    ├── core.py
-    ├── plotting.py
-    └── reports.py
-```
+Created with focus on biological network clarity and interactive depth.

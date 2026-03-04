@@ -50,31 +50,47 @@ def load_network(nodes_file: str, edges_file: str, weight_threshold: float, min_
 
 
 def load_network_from_dataframes(
-    nodes_df: pd.DataFrame, edges_df: pd.DataFrame, weight_threshold: float, min_degree: int = 1
+    nodes_df: pd.DataFrame,
+    edges_df: pd.DataFrame,
+    weight_threshold: float,
+    min_degree: int = 1,
+    node_id_col: str = "nodeName",
+    node_label_col: str = "altName",
+    from_node_col: str = "fromNode",
+    to_node_col: str = "toNode",
+    weight_col: str = "weight",
 ) -> nx.Graph:
-    required_nodes_cols = {"nodeName", "altName"}
-    required_edges_cols = {"fromNode", "toNode", "weight"}
+    required_nodes_cols = {node_id_col}
+    required_edges_cols = {from_node_col, to_node_col, weight_col}
+    
     missing_nodes = required_nodes_cols - set(nodes_df.columns)
     missing_edges = required_edges_cols - set(edges_df.columns)
+    
     if missing_nodes:
         raise ValueError(f"Missing required node columns: {sorted(missing_nodes)}")
     if missing_edges:
         raise ValueError(f"Missing required edge columns: {sorted(missing_edges)}")
 
-    edges_df = edges_df[edges_df["weight"] >= weight_threshold]
+    # Filter edges by weight early
+    edges_df = edges_df[edges_df[weight_col] >= weight_threshold]
 
     graph = nx.Graph()
-    node_attr_col = "nodeAttr[nodesPresent, ]"
 
+    # Add nodes with all their attributes
     for _, row in nodes_df.iterrows():
-        graph.add_node(
-            row["nodeName"],
-            altName=row["altName"],
-            nodeAttr=row[node_attr_col] if node_attr_col in nodes_df.columns else None,
-        )
+        node_id = row[node_id_col]
+        # Copy all other columns as attributes
+        attrs = row.to_dict()
+        # Add a canonical 'label' attribute for easy access
+        attrs["display_label"] = row[node_label_col] if node_label_col in nodes_df.columns else node_id
+        graph.add_node(node_id, **attrs)
 
+    # Add edges
     for _, row in edges_df.iterrows():
-        graph.add_edge(row["fromNode"], row["toNode"], weight=float(row["weight"]))
+        u = row[from_node_col]
+        v = row[to_node_col]
+        w = float(row[weight_col])
+        graph.add_edge(u, v, weight=w)
 
     if min_degree > 1:
         nodes_with_min_degree = [node for node, degree in dict(graph.degree()).items() if degree >= min_degree]
