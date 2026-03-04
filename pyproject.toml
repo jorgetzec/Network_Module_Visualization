@@ -1,0 +1,31 @@
+[project]
+name = "network-module-visualization"
+version = "0.1.0"
+description = "CLI and Streamlit app for network module visualization"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "matplotlib>=3.8",
+    "networkx>=3.3",
+    "pandas>=2.2",
+    "streamlit>=1.40",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3",
+    "ruff>=0.6",
+]
+
+[project.scripts]
+network-viz = "network_viz.cli:main"
+
+[tool.uv]
+package = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/network_viz"]
+
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
